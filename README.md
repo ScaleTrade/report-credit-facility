@@ -1,2 +1,2 @@
 # report-credit-facility
-Trading operations of selected trader groups for the selected day. Includes profit and loss graphs and detailed information about all performed deals and open positions.
+Displays credit operations on client accounts, covering both incoming and outgoing transactions. Includes transaction ID, date, amount, and account details.
