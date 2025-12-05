@@ -63,89 +63,136 @@ extern "C" void CreateReport(rapidjson::Value& request,
     };
 
     // Лямбда подготавливающая значения double для вставки в AST (округление до 2-х знаков)
-    auto format_for_AST = [](double value) -> std::string {
+    auto format_double_for_AST = [](double value) -> std::string {
         std::ostringstream oss;
         oss << std::fixed << std::setprecision(2) << value;
         return oss.str();
     };
 
-    auto create_table = [&](const std::vector<TradeRecord>& trades) -> Node {
-        std::vector<Node> thead_rows;
-        std::vector<Node> tbody_rows;
-        std::vector<Node> tfoot_rows;
+    // v.1
+    // auto create_table = [&](const std::vector<TradeRecord>& trades) -> Node {
+    //     std::vector<Node> thead_rows;
+    //     std::vector<Node> tbody_rows;
+    //     std::vector<Node> tfoot_rows;
+    //
+    //     // Thead
+    //     thead_rows.push_back(tr({
+    //         th({div({text("Order")})}),
+    //         th({div({text("Login")})}),
+    //         th({div({text("Name")})}),
+    //         th({div({text("Time")})}),
+    //         th({div({text("Comment")})}),
+    //         th({div({text("Amount")})}),
+    //         th({div({text("Currency")})}),
+    //     }));
+    //
+    //     // Tbody
+    //     for (const auto& trade : trades_vector) {
+    //         if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
+    //             AccountRecord account;
+    //
+    //             server->GetAccountByLogin(trade.login, &account);
+    //
+    //             std::string currency = get_group_currency(account.group);
+    //
+    //             auto& total = totals_map[currency];
+    //             total.currency = currency;
+    //             total.balance += trade.profit;
+    //
+    //             tbody_rows.push_back(tr({
+    //                 td({div({text(std::to_string(trade.order))})}),
+    //                 td({div({text(std::to_string(trade.login))})}),
+    //                 td({div({text(account.name)})}),
+    //                 td({div({text(utils::FormatTimestampToString(trade.close_time))})}),
+    //                 td({div({text(trade.comment)})}),
+    //                 td({div({text(format_double_for_AST(trade.profit))})}),
+    //                 td({div({text(currency)})}),
+    //             }));
+    //         }
+    //     }
+    //
+    //     // Tfoot
+    //     tfoot_rows.push_back(tr({
+    //         td({div({text("TOTAL:")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})}),
+    //         td({div({text("")})})
+    //     }));
+    //
+    //     for (const auto& pair : totals_map) {
+    //         const Total& total = pair.second;
+    //
+    //         tfoot_rows.push_back(tr({
+    //             td({div({text("")})}),
+    //             td({div({text("")})}),
+    //             td({div({text("")})}),
+    //             td({div({text("")})}),
+    //             td({div({text("")})}),
+    //             td({div({text(format_double_for_AST(total.balance))})}),
+    //             td({div({text(total.currency)})}),
+    //         }));
+    //     }
+    //
+    //     return table({
+    //         thead(thead_rows),
+    //         tbody(tbody_rows),
+    //         tfoot(tfoot_rows),
+    //     }, props({{"className", "table"}}));
+    // };
 
-        // Thead
-        thead_rows.push_back(tr({
-            th({div({text("Order")})}),
-            th({div({text("Login")})}),
-            th({div({text("Name")})}),
-            th({div({text("Time")})}),
-            th({div({text("Comment")})}),
-            th({div({text("Amount")})}),
-            th({div({text("Currency")})}),
-        }));
+    // v.2
+    TableBuilder table_builder("CreditFacilityReport");
 
-        // Tbody
-        for (const auto& trade : trades_vector) {
-            if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
-                AccountRecord account;
+    table_builder.SetIdColumn("order");
+    table_builder.SetOrderBy("order", "DESC");
+    table_builder.EnableRefreshButton(false);
+    table_builder.EnableBookmarksButton(false);
+    table_builder.EnableExportButton(true);
 
-                server->GetAccountByLogin(trade.login, &account);
+    table_builder.AddColumn({"order", "ORDER"});
+    table_builder.AddColumn({"login", "LOGIN"});
+    table_builder.AddColumn({"name", "NAME"});
+    table_builder.AddColumn({"close_time", "CLOSE_TIME"});
+    table_builder.AddColumn({"comment", "COMMENT"});
+    table_builder.AddColumn({"profit", "AMOUNT"});
+    table_builder.AddColumn({"currency", "CURRENCY"});
 
-                std::string currency = get_group_currency(account.group);
+    for (const auto& trade : trades_vector) {
+        if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
+            AccountRecord account;
 
-                auto& total = totals_map[currency];
-                total.currency = currency;
-                total.balance += trade.profit;
+            server->GetAccountByLogin(trade.login, &account);
 
-                tbody_rows.push_back(tr({
-                    td({div({text(std::to_string(trade.order))})}),
-                    td({div({text(std::to_string(trade.login))})}),
-                    td({div({text(account.name)})}),
-                    td({div({text(utils::FormatTimestampToString(trade.close_time))})}),
-                    td({div({text(trade.comment)})}),
-                    td({div({text(format_for_AST(trade.profit))})}),
-                    td({div({text(currency)})}),
-                }));
+            std::string currency = get_group_currency(account.group);
+
+            auto& total = totals_map[currency];
+            total.currency = currency;
+            total.balance += trade.profit;
+
+            for (const auto& trade : trades_vector) {
+                table_builder.AddRow({
+                    {"order", std::to_string(trade.order)},
+                    {"login", std::to_string(trade.login)},
+                    {"name", account.name},
+                    {"close_time", utils::FormatTimestampToString(trade.close_time)},
+                    {"comment", trade.comment},
+                    {"profit", format_double_for_AST(trade.profit)},
+                    {"currency", currency}
+                });
             }
         }
+    }
 
-        // Tfoot
-        tfoot_rows.push_back(tr({
-            td({div({text("TOTAL:")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})}),
-            td({div({text("")})})
-        }));
-
-        for (const auto& pair : totals_map) {
-            const Total& total = pair.second;
-
-            tfoot_rows.push_back(tr({
-                td({div({text("")})}),
-                td({div({text("")})}),
-                td({div({text("")})}),
-                td({div({text("")})}),
-                td({div({text("")})}),
-                td({div({text(format_for_AST(total.balance))})}),
-                td({div({text(total.currency)})}),
-            }));
-        }
-
-        return table({
-            thead(thead_rows),
-            tbody(tbody_rows),
-            tfoot(tfoot_rows),
-        }, props({{"className", "table"}}));
-    };
+    const JSONObject table_props = table_builder.CreateTableProps();
+    const Node table_node = Table({}, table_props);
 
     // Total report
     const Node report = div({
-        h1({text("Report Facility Report")}),
-        create_table(trades_vector),
+        h1({text("Credit Facility Report")}),
+        table_node
     });
 
     utils::CreateUI(report, response, allocator);
