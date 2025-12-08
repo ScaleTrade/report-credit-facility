@@ -69,81 +69,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         return oss.str();
     };
 
-    // v.1
-    // auto create_table = [&](const std::vector<TradeRecord>& trades) -> Node {
-    //     std::vector<Node> thead_rows;
-    //     std::vector<Node> tbody_rows;
-    //     std::vector<Node> tfoot_rows;
-    //
-    //     // Thead
-    //     thead_rows.push_back(tr({
-    //         th({div({text("Order")})}),
-    //         th({div({text("Login")})}),
-    //         th({div({text("Name")})}),
-    //         th({div({text("Time")})}),
-    //         th({div({text("Comment")})}),
-    //         th({div({text("Amount")})}),
-    //         th({div({text("Currency")})}),
-    //     }));
-    //
-    //     // Tbody
-    //     for (const auto& trade : trades_vector) {
-    //         if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
-    //             AccountRecord account;
-    //
-    //             server->GetAccountByLogin(trade.login, &account);
-    //
-    //             std::string currency = get_group_currency(account.group);
-    //
-    //             auto& total = totals_map[currency];
-    //             total.currency = currency;
-    //             total.balance += trade.profit;
-    //
-    //             tbody_rows.push_back(tr({
-    //                 td({div({text(std::to_string(trade.order))})}),
-    //                 td({div({text(std::to_string(trade.login))})}),
-    //                 td({div({text(account.name)})}),
-    //                 td({div({text(utils::FormatTimestampToString(trade.close_time))})}),
-    //                 td({div({text(trade.comment)})}),
-    //                 td({div({text(format_double_for_AST(trade.profit))})}),
-    //                 td({div({text(currency)})}),
-    //             }));
-    //         }
-    //     }
-    //
-    //     // Tfoot
-    //     tfoot_rows.push_back(tr({
-    //         td({div({text("TOTAL:")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})})
-    //     }));
-    //
-    //     for (const auto& pair : totals_map) {
-    //         const Total& total = pair.second;
-    //
-    //         tfoot_rows.push_back(tr({
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text(format_double_for_AST(total.balance))})}),
-    //             td({div({text(total.currency)})}),
-    //         }));
-    //     }
-    //
-    //     return table({
-    //         thead(thead_rows),
-    //         tbody(tbody_rows),
-    //         tfoot(tfoot_rows),
-    //     }, props({{"className", "table"}}));
-    // };
-
-    // v.2
     TableBuilder table_builder("CreditFacilityReport");
 
     table_builder.SetIdColumn("order");
@@ -189,8 +114,12 @@ extern "C" void CreateReport(rapidjson::Value& request,
     const JSONObject table_props = table_builder.CreateTableProps();
     const Node table_node = Table({}, table_props);
 
+    for (const auto& [currency, total_struct] : totals_map) {
+        std::cout << "TOTAL: " << total_struct.balance  << currency << std::endl;
+    }
+
     // Total report
-    const Node report = div({
+    const Node report = Column({
         h1({text("Credit Facility Report")}),
         table_node
     });
