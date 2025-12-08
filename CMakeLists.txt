@@ -18,6 +18,7 @@ add_executable(CreditFacilityReport ${SOURCES})
 target_include_directories(CreditFacilityReport PRIVATE
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/api
+        ${CMAKE_SOURCE_DIR}/external
         ${CMAKE_SOURCE_DIR}/src/utils
         ${CMAKE_SOURCE_DIR}/src/structures
 )
