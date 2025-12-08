@@ -21,12 +21,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
                              rapidjson::Value& response,
                              rapidjson::Document::AllocatorType& allocator,
                              CServerInterface* server) {
-    // Структура накопления итогов
-    struct Total {
-        double balance;
-        std::string currency;
-    };
-
     std::unordered_map<std::string, Total> totals_map;
 
     std::string group_mask;
@@ -89,25 +83,27 @@ extern "C" void CreateReport(rapidjson::Value& request,
         if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
             AccountRecord account;
 
-            server->GetAccountByLogin(trade.login, &account);
+            try {
+                server->GetAccountByLogin(trade.login, &account);
+            } catch (const std::exception& e) {
+                std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
+            }
 
             std::string currency = get_group_currency(account.group);
 
             auto& total = totals_map[currency];
             total.currency = currency;
-            total.balance += trade.profit;
+            total.profit += trade.profit;
 
-            for (const auto& trade : trades_vector) {
-                table_builder.AddRow({
-                    {"order", std::to_string(trade.order)},
-                    {"login", std::to_string(trade.login)},
-                    {"name", account.name},
-                    {"close_time", utils::FormatTimestampToString(trade.close_time)},
-                    {"comment", trade.comment},
-                    {"profit", format_double_for_AST(trade.profit)},
-                    {"currency", currency}
-                });
-            }
+            table_builder.AddRow({
+                {"order", std::to_string(trade.order)},
+                {"login", std::to_string(trade.login)},
+                {"name", account.name},
+                {"close_time", utils::FormatTimestampToString(trade.close_time)},
+                {"comment", trade.comment},
+                {"profit", format_double_for_AST(trade.profit)},
+                {"currency", currency}
+            });
         }
     }
 
@@ -115,7 +111,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     const Node table_node = Table({}, table_props);
 
     for (const auto& [currency, total_struct] : totals_map) {
-        std::cout << "TOTAL: " << total_struct.balance  << currency << std::endl;
+        std::cout << "TOTAL: " <<  total_struct.profit << " " << total_struct.currency << std::endl;
     }
 
     // Total report
