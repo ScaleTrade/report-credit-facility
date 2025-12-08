@@ -13,7 +13,7 @@ set(SOURCES
         ${STRUCTURES_SOURCE}
 )
 
-add_executable(CreditFacilityReport ${SOURCES})
+add_library(CreditFacilityReport SHARED ${SOURCES})
 
 target_include_directories(CreditFacilityReport PRIVATE
         ${CMAKE_SOURCE_DIR}/include
