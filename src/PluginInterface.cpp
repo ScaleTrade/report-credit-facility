@@ -83,6 +83,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
             auto& total = totals_map[currency];
             total.currency = currency;
             total.profit += trade.profit;
+
+            credit_trades_vector.emplace_back(trade);
         }
     }
 
