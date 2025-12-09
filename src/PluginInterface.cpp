@@ -77,7 +77,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.AddColumn({"name", "NAME"});
     table_builder.AddColumn({"close_time", "CLOSE_TIME"});
     table_builder.AddColumn({"comment", "COMMENT"});
-    table_builder.AddColumn({"profit", "AMOUNT"});
+    // table_builder.AddColumn({"profit", "AMOUNT"});
     table_builder.AddColumn({"currency", "CURRENCY"});
 
     for (const auto& trade : trades_vector) {
@@ -91,15 +91,20 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }
 
             std::string currency = get_group_currency(account.group);
-            double multiplier;
 
-            try {
-                server->CalculateConvertRateByCurrency(currency, "USD", trade.cmd, &multiplier);
-            } catch (const std::exception& e) {
-                std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
+            if (currency == "USD") {
+                usd_total_profit += trade.profit;
+            } else {
+                double multiplier;
+
+                try {
+                    server->CalculateConvertRateByCurrency(currency, "USD", trade.cmd, &multiplier);
+                } catch (const std::exception& e) {
+                    std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
+                }
+
+                usd_total_profit += trade.profit * multiplier;
             }
-
-            usd_total_profit += trade.profit * multiplier;
 
             table_builder.AddRow({
                 {"order", std::to_string(trade.order)},
@@ -112,6 +117,22 @@ extern "C" void CreateReport(rapidjson::Value& request,
             });
         }
     }
+
+    // Колонка profit с пропсами
+    TableColumn profit_col;
+    profit_col.key = "profit";
+    profit_col.language_token = "AMOUNT";
+    profit_col.filter_type = "search";
+
+    JSONValue total_val = 0.00;
+    JSONObject total_obj = {
+        {"val", total_val},
+        {"summary", usd_total_profit}
+    };
+
+    profit_col.AddColumnProp("total", total_obj);
+
+    table_builder.AddColumn(profit_col);
 
     const JSONObject table_props = table_builder.CreateTableProps();
     const Node table_node = Table({}, table_props);

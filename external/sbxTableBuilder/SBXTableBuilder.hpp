@@ -14,15 +14,40 @@ struct TableColumn {
     bool is_exportable = true;
     std::string filter_type = "search";
 
+    std::map<std::string, JSONValue> extra_props;
+    std::map<std::string, JSONValue> filter_props;
+
+    void AddColumnProp(const std::string& name, const JSONValue& value) {
+        extra_props[name] = value;
+    }
+
+    void AddFilterProp(const std::string& name, const JSONValue& value) {
+        filter_props[name] = value;
+    }
+
     [[nodiscard]] JSONValue ToJSON() const {
         // TODO: фильтр надо будет расширять
-        JSONObject filter = {{"type", filter_type}};
+        JSONObject filter;
+
+        // Базовые фильтры
+        filter["type"] = filter_type;
+
+        // Дополнительные фильтры
+        for (const auto& [k, v] : filter_props) {
+            filter[k] = v;
+        }
+
         JSONObject column_props = {
             {"name", language_token},
             {"filter", filter},
             {"sort", is_sortable},
             {"export", is_exportable}
         };
+
+        // Дополнительные свойства колонки
+        for (const auto& [k, v] : extra_props) {
+            column_props[k] = v;
+        }
 
         return column_props;
     }
