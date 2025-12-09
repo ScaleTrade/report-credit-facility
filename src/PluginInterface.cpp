@@ -71,14 +71,14 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.EnableRefreshButton(false);
     table_builder.EnableBookmarksButton(false);
     table_builder.EnableExportButton(true);
-    table_builder.EnableSummary(true);
+    table_builder.EnableTotal(true);
 
     table_builder.AddColumn({"order", "ORDER"});
     table_builder.AddColumn({"login", "LOGIN"});
     table_builder.AddColumn({"name", "NAME"});
     table_builder.AddColumn({"close_time", "CLOSE_TIME"});
     table_builder.AddColumn({"comment", "COMMENT"});
-    // table_builder.AddColumn({"profit", "AMOUNT"});
+    table_builder.AddColumn({"profit", "AMOUNT"});
     table_builder.AddColumn({"currency", "CURRENCY"});
 
     for (const auto& trade : trades_vector) {
@@ -119,26 +119,14 @@ extern "C" void CreateReport(rapidjson::Value& request,
         }
     }
 
-    // Колонка profit с пропсами
-    TableColumn profit_col;
-    profit_col.key = "profit";
-    profit_col.language_token = "AMOUNT";
-    profit_col.filter_type = "search";
+    // Total row
+    JSONArray totals_array;
+    totals_array.emplace_back(JSONObject{{"profit", usd_total_profit}});
 
-    JSONValue total_val = 0.00;
-    JSONObject total_obj = {
-        {"val", total_val},
-        {"summary", usd_total_profit}
-    };
-
-    profit_col.AddColumnProp("total", total_obj);
-
-    table_builder.AddColumn(profit_col);
+    table_builder.SetTotalData(totals_array);
 
     const JSONObject table_props = table_builder.CreateTableProps();
     const Node table_node = Table({}, table_props);
-
-    std::cout << "[CreditFacilityReportInterface]: " << "USD profit: " << usd_total_profit << std::endl;
 
     // Total report
     const Node report = Column({

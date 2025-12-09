@@ -77,6 +77,10 @@ public:
         _order_by = {column, order};
     }
 
+    void SetTotalData(const JSONArray& total_data) {
+        _total_data = total_data;
+    }
+
     void EnableExportButton(const bool& enabled = true) {
         _show_export_button = enabled;
     }
@@ -116,6 +120,10 @@ public:
             {"structure", structure}
         };
 
+        if (!_total_data.empty()) {
+            table_props["totalData"] = _total_data;
+        }
+
         return table_props;
     }
 
@@ -124,6 +132,7 @@ private:
     std::string _id_column;
     std::map<std::string, JSONValue> _columns;
     JSONArray _data;
+    JSONArray _total_data;
     std::vector <std::string> _order_by = {"id", "DESC"};
     bool _show_refresh_button = true;
     bool _show_bookmarks_button = true;
