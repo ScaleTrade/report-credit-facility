@@ -45,8 +45,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
     }
 
-    std::cout << "[CreditFacilityReportInterface]: " << "trades size: " << trades_vector.size() << std::endl;
-
     // Лямбда для поиска валюты аккаунта по группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
         for (const auto& group : groups_vector) {
