@@ -89,6 +89,14 @@ public:
         _show_export_button = enabled;
     }
 
+    void EnableTotal(const bool& enabled = true) {
+        _show_total = enabled;
+    }
+
+    void EnableSummary(const bool& enabled = true) {
+        _show_summary = enabled;
+    }
+
     [[nodiscard]] JSONObject CreateTableProps() const {
         JSONObject structure;
         for (const auto& [key, value] : _columns) {
@@ -102,6 +110,8 @@ public:
             {"orderBy", JSONArray{_order_by[0], _order_by[1]}},
             {"showRefreshBtn", _show_refresh_button},
             {"showBookmarksBtn", _show_bookmarks_button},
+            {"showTotal", _show_total},
+            {"showSummary", _show_summary},
             {"showExportBtn", _show_export_button},
             {"structure", structure}
         };
@@ -118,5 +128,7 @@ private:
     bool _show_refresh_button = true;
     bool _show_bookmarks_button = true;
     bool _show_export_button = true;
+    bool _show_total = false;
+    bool _show_summary = false;
 };
 
