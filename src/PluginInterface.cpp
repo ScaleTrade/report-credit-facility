@@ -34,16 +34,18 @@ extern "C" void CreateReport(rapidjson::Value& request,
         to = request["to"].GetInt();
     }
 
-    std::vector<TradeRecord> default_trades_vector;
+    std::vector<TradeRecord> trades_vector;
     std::vector<GroupRecord> groups_vector;
     double usd_total_profit = 0;
 
     try {
-        server->GetTransactionsByGroup(group_mask, from, to, &default_trades_vector);
+        server->GetTransactionsByGroup(group_mask, from, to, &trades_vector);
         server->GetAllGroups(&groups_vector);
     } catch (const std::exception& e) {
         std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
     }
+
+    std::cout << "[CreditFacilityReportInterface]: " << "trades size: " << trades_vector.size() << std::endl;
 
     // Лямбда для поиска валюты аккаунта по группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
@@ -78,7 +80,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.AddColumn({"profit", "AMOUNT"});
     table_builder.AddColumn({"currency", "CURRENCY"});
 
-    for (const auto& trade : default_trades_vector) {
+    for (const auto& trade : trades_vector) {
         if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
             AccountRecord account;
 
