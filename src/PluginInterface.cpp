@@ -97,7 +97,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
             }
 
-            usd_total_profit += trade.profit * multiplier;
+            usd_total_profit += trade.profit;
 
             table_builder.AddRow({
                 {"order", std::to_string(trade.order)},
