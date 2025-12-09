@@ -35,10 +35,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
     }
 
     std::vector<TradeRecord> default_trades_vector;
-    std::vector<TradeRecord> credit_trades_vector;
     std::vector<GroupRecord> groups_vector;
-    std::unordered_map<int, AccountRecord> accounts_map;
-    std::unordered_map<std::string, Total> totals_map;
+    double usd_total_profit = 0;
 
     try {
         server->GetTransactionsByGroup(group_mask, from, to, &default_trades_vector);
@@ -64,35 +62,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         return oss.str();
     };
 
-
-    // Подготовка необходимых данных
-    for (const auto& trade : default_trades_vector) {
-        if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
-            AccountRecord account;
-
-            try {
-                server->GetAccountByLogin(trade.login, &account);
-            } catch (const std::exception& e) {
-                std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
-            }
-
-            accounts_map[trade.login] = account;
-
-            std::string currency = get_group_currency(account.group);
-
-            auto& total = totals_map[currency];
-            total.currency = currency;
-            total.profit += trade.profit;
-
-            credit_trades_vector.emplace_back(trade);
-        }
-    }
-
-    for (const auto& [currency, total_struct] : totals_map) {
-        std::cout << "TOTAL: " <<  total_struct.profit << " " << total_struct.currency << std::endl;
-    }
-
-    // Подготовка таблицы
     TableBuilder table_builder("CreditFacilityReport");
 
     table_builder.SetIdColumn("order");
@@ -109,23 +78,43 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.AddColumn({"profit", "AMOUNT"});
     table_builder.AddColumn({"currency", "CURRENCY"});
 
-    for (const auto& credit_trade : credit_trades_vector) {
-        const auto& account = accounts_map[credit_trade.login];
-        std::string currency = get_group_currency(account.group);
+    for (const auto& trade : default_trades_vector) {
+        if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
+            AccountRecord account;
 
-        table_builder.AddRow({
-            {"order", std::to_string(credit_trade.order)},
-            {"login", std::to_string(credit_trade.login)},
-            {"name", account.name},
-            {"close_time", utils::FormatTimestampToString(credit_trade.close_time)},
-            {"comment", credit_trade.comment},
-            {"profit", format_double_for_AST(credit_trade.profit)},
-            {"currency", currency}
-        });
+            try {
+                server->GetAccountByLogin(trade.login, &account);
+            } catch (const std::exception& e) {
+                std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
+            }
+
+            std::string currency = get_group_currency(account.group);
+            double multiplier;
+
+            try {
+                server->CalculateConvertRateByCurrency(currency, "USD", trade.cmd, &multiplier);
+            } catch (const std::exception& e) {
+                std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
+            }
+
+            usd_total_profit += trade.profit * multiplier;
+
+            table_builder.AddRow({
+                {"order", std::to_string(trade.order)},
+                {"login", std::to_string(trade.login)},
+                {"name", account.name},
+                {"close_time", utils::FormatTimestampToString(trade.close_time)},
+                {"comment", trade.comment},
+                {"profit", format_double_for_AST(trade.profit)},
+                {"currency", currency}
+            });
+        }
     }
 
     const JSONObject table_props = table_builder.CreateTableProps();
     const Node table_node = Table({}, table_props);
+
+    std::cout << "[CreditFacilityReportInterface]: " << "USD profit: " << usd_total_profit << std::endl;
 
     // Total report
     const Node report = Column({
