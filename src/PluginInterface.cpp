@@ -91,11 +91,11 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }
 
             std::string currency = get_group_currency(account.group);
+            double multiplier = 1;
 
             if (currency == "USD") {
                 usd_total_profit += trade.profit;
             } else {
-                double multiplier;
 
                 try {
                     server->CalculateConvertRateByCurrency(currency, "USD", trade.cmd, &multiplier);
@@ -112,15 +112,15 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 {"name", account.name},
                 {"close_time", utils::FormatTimestampToString(trade.close_time)},
                 {"comment", trade.comment},
-                {"profit", format_double_for_AST(trade.profit)},
-                {"currency", currency}
+                {"profit", format_double_for_AST(trade.profit * multiplier)},
+                {"currency", "USD"}
             });
         }
     }
 
     // Total row
     JSONArray totals_array;
-    totals_array.emplace_back(JSONObject{{"profit", usd_total_profit}});
+    totals_array.emplace_back(JSONObject{{"profit", usd_total_profit}, {"currency", "USD"}});
 
     table_builder.SetTotalData(totals_array);
 
