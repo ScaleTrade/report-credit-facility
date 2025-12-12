@@ -7,7 +7,6 @@
 #include "Structures.hpp"
 #include "ast/Ast.hpp"
 #include <rapidjson/document.h>
-#include "Structures.hpp"
 
 using namespace ast;
 
