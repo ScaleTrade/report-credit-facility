@@ -90,12 +90,12 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }
 
             table_builder.AddRow({
-                {"order", utils::RoundDouble(trade.order, 0)},
-                {"login", utils::RoundDouble(trade.login, 0)},
+                {"order", utils::TruncateDouble(trade.order, 0)},
+                {"login", utils::TruncateDouble(trade.login, 0)},
                 {"name", account.name},
                 {"close_time", utils::FormatTimestampToString(trade.close_time)},
                 {"comment", trade.comment},
-                {"profit", utils::RoundDouble(trade.profit * multiplier, 2)},
+                {"profit", utils::TruncateDouble(trade.profit * multiplier, 2)},
                 {"currency", "USD"}
             });
         }
@@ -103,7 +103,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     // Total row
     JSONArray totals_array;
-    totals_array.emplace_back(JSONObject{{"profit", utils::RoundDouble(usd_total_profit, 2)}, {"currency", "USD"}});
+    totals_array.emplace_back(JSONObject{{"profit", utils::TruncateDouble(usd_total_profit, 2)}, {"currency", "USD"}});
 
     table_builder.SetTotalData(totals_array);
 
