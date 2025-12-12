@@ -3,6 +3,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include "Structures.hpp"
 #include "ast/Ast.hpp"
 #include <rapidjson/document.h>
 #include "Structures.hpp"
@@ -14,5 +15,9 @@ namespace utils {
               rapidjson::Value& response,
               rapidjson::Document::AllocatorType& allocator);
 
-    std::string FormatTimestampToString(const time_t timestamp);
+    std::string FormatTimestampToString(const time_t& timestamp);
+
+    double RoundDouble(const double& value, const int& digits);
+
+    std::string GetGroupCurrencyByName(const std::vector<GroupRecord>& group_vector, const std::string& group_name);
 }

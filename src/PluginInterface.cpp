@@ -45,23 +45,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
     }
 
-    // Лямбда для поиска валюты аккаунта по группе
-    auto get_group_currency = [&](const std::string& group_name) -> std::string {
-        for (const auto& group : groups_vector) {
-            if (group.group == group_name) {
-                return group.currency;
-            }
-        }
-        return "N/A"; // группа не найдена - валюта не определена
-    };
-
-    // Лямбда подготавливающая значения double для вставки в AST (округление до 2-х знаков)
-    auto format_double_for_AST = [](double value) -> std::string {
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(2) << value;
-        return oss.str();
-    };
-
     TableBuilder table_builder("CreditFacilityReport");
 
     table_builder.SetIdColumn("order");
@@ -72,13 +55,13 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.EnableTotal(true);
     table_builder.SetTotalDataTitle("TOTAL");
 
-    table_builder.AddColumn({"order", "ORDER"});
-    table_builder.AddColumn({"login", "LOGIN"});
-    table_builder.AddColumn({"name", "NAME"});
-    table_builder.AddColumn({"close_time", "CLOSE_TIME"});
-    table_builder.AddColumn({"comment", "COMMENT"});
-    table_builder.AddColumn({"profit", "AMOUNT"});
-    table_builder.AddColumn({"currency", "CURRENCY"});
+    table_builder.AddColumn({"order", "ORDER", 1});
+    table_builder.AddColumn({"login", "LOGIN", 2});
+    table_builder.AddColumn({"name", "NAME", 3});
+    table_builder.AddColumn({"close_time", "CLOSE_TIME", 4});
+    table_builder.AddColumn({"comment", "COMMENT", 5});
+    table_builder.AddColumn({"profit", "AMOUNT", 6});
+    table_builder.AddColumn({"currency", "CURRENCY", 7});
 
     for (const auto& trade : trades_vector) {
         if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
@@ -90,7 +73,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
             }
 
-            std::string currency = get_group_currency(account.group);
+            std::string currency = utils::GetGroupCurrencyByName(groups_vector, account.group);
             double multiplier = 1;
 
             if (currency == "USD") {
@@ -107,12 +90,12 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }
 
             table_builder.AddRow({
-                {"order", std::to_string(trade.order)},
-                {"login", std::to_string(trade.login)},
+                {"order", utils::RoundDouble(trade.order, 0)},
+                {"login", utils::RoundDouble(trade.login, 0)},
                 {"name", account.name},
                 {"close_time", utils::FormatTimestampToString(trade.close_time)},
                 {"comment", trade.comment},
-                {"profit", format_double_for_AST(trade.profit * multiplier)},
+                {"profit", utils::RoundDouble(trade.profit * multiplier, 2)},
                 {"currency", "USD"}
             });
         }
@@ -120,7 +103,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     // Total row
     JSONArray totals_array;
-    totals_array.emplace_back(JSONObject{{"profit", usd_total_profit}, {"currency", "USD"}});
+    totals_array.emplace_back(JSONObject{{"profit", utils::RoundDouble(usd_total_profit, 2)}, {"currency", "USD"}});
 
     table_builder.SetTotalData(totals_array);
 
