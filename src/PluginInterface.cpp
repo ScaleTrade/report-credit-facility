@@ -103,7 +103,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     // Total row
     JSONArray totals_array;
-    totals_array.emplace_back(JSONObject{{"profit", utils::RoundDouble(usd_total_profit, 2)}, {"currency", "USD"}});
+    totals_array.emplace_back(JSONObject{{"profit", std::to_string(usd_total_profit)}, {"currency", "USD"}});
 
     table_builder.SetTotalData(totals_array);
 
