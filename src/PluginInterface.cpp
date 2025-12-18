@@ -90,13 +90,13 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }
 
             table_builder.AddRow({
-                {"order", utils::TruncateDouble(trade.order, 0)},
-                {"login", utils::TruncateDouble(trade.login, 0)},
-                {"name", account.name},
-                {"close_time", utils::FormatTimestampToString(trade.close_time)},
-                {"comment", trade.comment},
-                {"profit", utils::TruncateDouble(trade.profit * multiplier, 2)},
-                {"currency", "USD"}
+                utils::TruncateDouble(trade.order, 0),
+                utils::TruncateDouble(trade.login, 0),
+                account.name,
+                utils::FormatTimestampToString(trade.close_time),
+                trade.comment,
+                utils::TruncateDouble(trade.profit * multiplier, 2),
+                "USD"
             });
         }
     }
