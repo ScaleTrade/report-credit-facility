@@ -58,7 +58,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.AddColumn({"order", "ORDER", 1});
     table_builder.AddColumn({"login", "LOGIN", 2});
     table_builder.AddColumn({"name", "NAME", 3});
-    table_builder.AddColumn({"close_time", "CLOSE_TIME", 4});
+    table_builder.AddColumn({"open_time", "OPEN_TIME", 4});
     table_builder.AddColumn({"comment", "COMMENT", 5});
     table_builder.AddColumn({"profit", "AMOUNT", 6});
     table_builder.AddColumn({"currency", "CURRENCY", 7});
@@ -93,7 +93,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 utils::TruncateDouble(trade.order, 0),
                 utils::TruncateDouble(trade.login, 0),
                 account.name,
-                utils::FormatTimestampToString(trade.close_time),
+                utils::FormatTimestampToString(trade.open_time),
                 trade.comment,
                 utils::TruncateDouble(trade.profit * multiplier, 2),
                 "USD"
