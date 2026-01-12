@@ -61,11 +61,11 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
     table_builder.SetTotalDataTitle("TOTAL");
 
     // Filters
-    FilterConfig date_time_filter;
-    date_time_filter.type = FilterType::DateTime;
-
     FilterConfig search_filter;
     search_filter.type = FilterType::Search;
+
+    FilterConfig date_time_filter;
+    date_time_filter.type = FilterType::DateTime;
 
     // Columns
     table_builder.AddColumn({"order", "ORDER", 1, search_filter});
