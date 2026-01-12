@@ -239,7 +239,7 @@ private:
         return "search";
     }
 
-    static std::string ConvertSearchTypeToString(SearchType search_type) {
+    static std::string ConvertSearchTypeToString(const SearchType search_type) {
         switch (search_type) {
             case SearchType::Like: return "like";
             case SearchType::Equal: return "equal";
