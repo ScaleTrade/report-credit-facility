@@ -102,9 +102,10 @@ public:
 
         if (column.filter) {
             column_obj["filter"] = ConvertFilterToJson(*column.filter);
-        } else {
-            column_obj["filter"] = JSONObject{{"type", "search"}};
         }
+        // else {
+        //     column_obj["filter"] = JSONObject{{"type", "search"}};
+        // }
 
         _structure[column.key] = std::move(column_obj);
     }
