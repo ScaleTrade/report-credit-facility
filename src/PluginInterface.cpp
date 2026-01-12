@@ -45,8 +45,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
     }
 
+    // Создание таблицы
     TableBuilder table_builder("CreditFacilityReport");
 
+    // Пропсы таблицы
     table_builder.SetIdColumn("order");
     table_builder.SetOrderBy("order", "DESC");
     table_builder.EnableRefreshButton(false);
@@ -55,10 +57,15 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.EnableTotal(true);
     table_builder.SetTotalDataTitle("TOTAL");
 
+    // Создание фильтров
+    FilterConfig open_time_filter;
+    open_time_filter.type = FilterType::DateTime;
+
+    // Добавление колонок
     table_builder.AddColumn({"order", "ORDER", 1});
     table_builder.AddColumn({"login", "LOGIN", 2});
     table_builder.AddColumn({"name", "NAME", 3});
-    table_builder.AddColumn({"open_time", "OPEN_TIME", 4});
+    table_builder.AddColumn({"open_time", "OPEN_TIME", 4, open_time_filter});
     table_builder.AddColumn({"comment", "COMMENT", 5});
     table_builder.AddColumn({"profit", "AMOUNT", 6});
     table_builder.AddColumn({"currency", "CURRENCY", 7});
