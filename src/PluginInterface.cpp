@@ -61,12 +61,20 @@ extern "C" void CreateReport(rapidjson::Value& request,
     FilterConfig open_time_filter;
     open_time_filter.type = FilterType::DateTime;
 
+    // test
+    FilterConfig comment_filter;
+    comment_filter.type = FilterType::Select;
+    comment_filter.options = {
+        {"1<10>", "1<10>"},
+        {"test<5>", "test<5>"}
+    };
+
     // Добавление колонок
     table_builder.AddColumn({"order", "ORDER", 1});
     table_builder.AddColumn({"login", "LOGIN", 2});
     table_builder.AddColumn({"name", "NAME", 3});
     table_builder.AddColumn({"open_time", "OPEN_TIME", 4, open_time_filter});
-    table_builder.AddColumn({"comment", "COMMENT", 5});
+    table_builder.AddColumn({"comment", "COMMENT", 5, comment_filter});
     table_builder.AddColumn({"profit", "AMOUNT", 6});
     table_builder.AddColumn({"currency", "CURRENCY", 7});
 
