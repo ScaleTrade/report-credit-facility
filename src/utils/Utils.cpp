@@ -94,8 +94,7 @@ namespace utils {
         response.AddMember("ui", ui_object, allocator);
     }
 
-    std::string FormatTimestampToString(const time_t&      timestamp,
-                                        const std::string& format = "%Y.%m.%d %H:%M:%S") {
+    std::string FormatTimestampToString(const time_t& timestamp, const std::string& format) {
         std::tm tm{};
         localtime_r(&timestamp, &tm);
 
