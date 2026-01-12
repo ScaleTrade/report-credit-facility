@@ -101,7 +101,7 @@ namespace utils {
         localtime_r(&timestamp, &tm);
 
         std::ostringstream oss;
-        oss << std::put_time(&tm, "%d.%m.%Y %H:%M:%S");
+        oss << std::put_time(&tm, "%d-%m-%Y %H:%M:%S");
         return oss.str();
     }
 
