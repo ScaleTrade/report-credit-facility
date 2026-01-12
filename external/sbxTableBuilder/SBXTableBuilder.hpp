@@ -12,12 +12,12 @@ using namespace ast;
 enum class FilterType {
     Search,              // Текстовый поиск
     Select,              // Выпадающий список
-    Date,                // Выбор даты
+    Date,                // Дата
     DateTime,            // Дата + время
     DateTimeSec,         // Дата + время с секундами
-    DateInput,           // Поле ввода даты
-    DateTimeInput,       // Поле ввода даты и времени
-    DateTimeSecInput     // Поле ввода даты и времени с секундами
+    DateInput,           // Дата + поле ввода
+    DateTimeInput,       // Дата + время + поле ввода
+    DateTimeSecInput     // Дата + время с секундами + поле ввода
 };
 
 // Тип операции поиска, применяемой фильтром
