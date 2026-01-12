@@ -2,28 +2,31 @@
 
 #include <iomanip>
 
-extern "C" void AboutReport(rapidjson::Value& request,
-                            rapidjson::Value& response,
+extern "C" void AboutReport(rapidjson::Value&                   request,
+                            rapidjson::Value&                   response,
                             rapidjson::Document::AllocatorType& allocator,
-                            CServerInterface* server) {
+                            CServerInterface*                   server) {
     response.AddMember("version", 1, allocator);
     response.AddMember("name", Value().SetString("Credit Facility report", allocator), allocator);
-    response.AddMember("description",
-    Value().SetString("Displays credit operations on client accounts, covering both incoming and outgoing transactions. "
-                        "Includes operation IDs, dates, amounts, and trader information.",
-             allocator), allocator);
+    response.AddMember(
+        "description",
+        Value().SetString("Displays credit operations on client accounts, covering both incoming "
+                          "and outgoing transactions. "
+                          "Includes operation IDs, dates, amounts, and trader information.",
+                          allocator),
+        allocator);
     response.AddMember("type", REPORT_RANGE_GROUP_TYPE, allocator);
 }
 
 extern "C" void DestroyReport() {}
 
-extern "C" void CreateReport(rapidjson::Value& request,
-                             rapidjson::Value& response,
+extern "C" void CreateReport(rapidjson::Value&                   request,
+                             rapidjson::Value&                   response,
                              rapidjson::Document::AllocatorType& allocator,
-                             CServerInterface* server) {
+                             CServerInterface*                   server) {
     std::string group_mask;
-    int from;
-    int to;
+    int         from;
+    int         to;
     if (request.HasMember("group") && request["group"].IsString()) {
         group_mask = request["group"].GetString();
     }
@@ -36,7 +39,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     std::vector<TradeRecord> trades_vector;
     std::vector<GroupRecord> groups_vector;
-    double usd_total_profit = 0;
+    double                   usd_total_profit = 0;
 
     try {
         server->GetTransactionsByGroup(group_mask, from, to, &trades_vector);
@@ -83,13 +86,12 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
             }
 
-            std::string currency = utils::GetGroupCurrencyByName(groups_vector, account.group);
-            double multiplier = 1;
+            std::string currency   = utils::GetGroupCurrencyByName(groups_vector, account.group);
+            double      multiplier = 1;
 
             if (currency == "USD") {
                 usd_total_profit += trade.profit;
             } else {
-
                 try {
                     server->CalculateConvertRateByCurrency(currency, "USD", trade.cmd, &multiplier);
                 } catch (const std::exception& e) {
@@ -99,32 +101,28 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 usd_total_profit += trade.profit * multiplier;
             }
 
-            table_builder.AddRow({
-                utils::TruncateDouble(trade.order, 0),
-                utils::TruncateDouble(trade.login, 0),
-                account.name,
-                utils::FormatTimestampToString(trade.open_time),
-                trade.comment,
-                utils::TruncateDouble(trade.profit * multiplier, 2),
-                "USD"
-            });
+            table_builder.AddRow({utils::TruncateDouble(trade.order, 0),
+                                  utils::TruncateDouble(trade.login, 0),
+                                  account.name,
+                                  utils::FormatTimestampToString(trade.open_time),
+                                  trade.comment,
+                                  utils::TruncateDouble(trade.profit * multiplier, 2),
+                                  "USD"});
         }
     }
 
     // Total row
     JSONArray totals_array;
-    totals_array.emplace_back(JSONObject{{"profit", utils::TruncateDouble(usd_total_profit, 2)}, {"currency", "USD"}});
+    totals_array.emplace_back(
+        JSONObject{{"profit", utils::TruncateDouble(usd_total_profit, 2)}, {"currency", "USD"}});
 
     table_builder.SetTotalData(totals_array);
 
     const JSONObject table_props = table_builder.CreateTableProps();
-    const Node table_node = Table({}, table_props);
+    const Node       table_node  = Table({}, table_props);
 
     // Total report
-    const Node report = Column({
-        h1({text("Credit Facility Report")}),
-        table_node
-    });
+    const Node report = Column({h1({text("Credit Facility Report")}), table_node});
 
     utils::CreateUI(report, response, allocator);
 }
