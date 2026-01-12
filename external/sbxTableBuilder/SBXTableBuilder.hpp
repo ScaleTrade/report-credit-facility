@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <optional>
 #include "ast/Ast.hpp"
 
 using namespace ast;
