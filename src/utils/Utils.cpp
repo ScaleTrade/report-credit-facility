@@ -96,12 +96,12 @@ namespace utils {
         response.AddMember("ui", ui_object, allocator);
     }
 
-    std::string FormatTimestampToString(const time_t& timestamp, const std::string& format = "%Y-%m-%d %H:%M:%S") {
+    std::string FormatTimestampToString(const time_t& timestamp) {
         std::tm tm{};
         localtime_r(&timestamp, &tm);
 
         std::ostringstream oss;
-        oss << std::put_time(&tm, format.c_str());
+        oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
         return oss.str();
     }
 
