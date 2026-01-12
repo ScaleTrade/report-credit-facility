@@ -100,7 +100,11 @@ public:
         column_obj["export"] = column.is_exported;
         column_obj["sort"] = column.is_sorted;
 
-        column_obj["filter"] = JSONObject{{"type", "search"}};
+        if (column.filter) {
+            column_obj["filter"] = ConvertFilterToJson(*column.filter);
+        } else {
+            column_obj["filter"] = JSONObject{{"type", "search"}};
+        }
 
         _structure[column.key] = std::move(column_obj);
     }
