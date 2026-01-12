@@ -72,7 +72,6 @@ struct FilterConfig {
     // Дополнительные флаги поведения фильтра
     std::optional<bool> is_exact;        // Точное совпадение
     std::optional<bool> is_return_unix;  // Возвращать дату в UNIX-формате
-    std::optional<bool> based_on_resp;   // Основано на ответе сервера
 };
 
 // Конфигурация одной колонки таблицы
@@ -103,9 +102,6 @@ public:
         if (column.filter) {
             column_obj["filter"] = ConvertFilterToJson(*column.filter);
         }
-        // else {
-        //     column_obj["filter"] = JSONObject{{"type", "search"}};
-        // }
 
         _structure[column.key] = std::move(column_obj);
     }
@@ -226,7 +222,6 @@ private:
         if (filter_config.virtualized_option_height) json_object["virtualized_option_height"] = *filter_config.virtualized_option_height;
         if (filter_config.is_exact) json_object["is_exact"] = *filter_config.is_exact;
         if (filter_config.is_return_unix) json_object["is_return_unix"] = *filter_config.is_return_unix;
-        if (filter_config.based_on_resp) json_object["based_on_resp"] = *filter_config.based_on_resp;
 
         return json_object;
     }

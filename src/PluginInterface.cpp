@@ -61,14 +61,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
     FilterConfig date_time_filter;
     date_time_filter.type = FilterType::DateTime;
 
+    FilterConfig search_filter;
+    search_filter.type = FilterType::Search;
+
     // Добавление колонок
-    table_builder.AddColumn({"order", "ORDER", 1});
-    table_builder.AddColumn({"login", "LOGIN", 2});
-    table_builder.AddColumn({"name", "NAME", 3});
+    table_builder.AddColumn({"order", "ORDER", 1, search_filter});
+    table_builder.AddColumn({"login", "LOGIN", 2, search_filter});
+    table_builder.AddColumn({"name", "NAME", 3, search_filter});
     table_builder.AddColumn({"open_time", "OPEN_TIME", 4, date_time_filter});
-    table_builder.AddColumn({"comment", "COMMENT", 5});
-    table_builder.AddColumn({"profit", "AMOUNT", 6});
-    table_builder.AddColumn({"currency", "CURRENCY", 7});
+    table_builder.AddColumn({"comment", "COMMENT", 5, search_filter});
+    table_builder.AddColumn({"profit", "AMOUNT", 6, search_filter});
+    table_builder.AddColumn({"currency", "CURRENCY", 7, search_filter});
 
     for (const auto& trade : trades_vector) {
         if (trade.cmd == OP_CREDIT_IN || trade.cmd == OP_CREDIT_OUT) {
