@@ -5,9 +5,10 @@
 #include <iomanip>
 #include <sstream>
 
+#include "ReportServerInterface.h"
 #include "Structures.h"
 #include "ast/Ast.hpp"
-#include <rapidjson/document.h>
+#include "rapidjson/document.h"
 
 using namespace ast;
 
@@ -21,6 +22,6 @@ namespace utils {
 
     double TruncateDouble(const double& value, const int& digits);
 
-    std::string GetGroupCurrencyByName(const std::vector<GroupRecord>& group_vector,
-                                       const std::string&              group_name);
+    std::string GetGroupCurrencyByName(const std::vector<ReportGroupRecord>& group_vector,
+                                       const std::string&                    group_name);
 } // namespace utils
