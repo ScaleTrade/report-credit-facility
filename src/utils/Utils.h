@@ -24,4 +24,6 @@ namespace utils {
 
     std::string GetGroupCurrencyByName(const std::vector<ReportGroupRecord>& group_vector,
                                        const std::string&                    group_name);
+
+    std::string ConvertCmdToString(const int cmd);
 } // namespace utils
