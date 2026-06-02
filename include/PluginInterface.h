@@ -12,6 +12,8 @@
 #include "rapidjson/document.h"
 #include "ast/Ast.hpp"
 #include "sbxTableBuilder/SBXTableBuilder.hpp"
+#include "structures/ValidationResult.h"
+#include "validators/RequestValidator.h"
 #include "utils/Utils.h"
 
 using namespace ast;

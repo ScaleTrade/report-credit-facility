@@ -3,6 +3,7 @@
 #include <cmath>
 #include <ctime>
 #include <iomanip>
+#include <set>
 #include <sstream>
 
 #include "ReportServerInterface.h"
@@ -26,4 +27,9 @@ namespace utils {
                                        const std::string&                    group_name);
 
     std::string ConvertCmdToString(const int cmd);
+
+    std::string Trim(const std::string& str);
+
+    std::set<std::string> SplitToSet(const std::string& str);
+
 } // namespace utils
